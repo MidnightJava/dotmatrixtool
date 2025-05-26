@@ -145,6 +145,18 @@ function initOptions() {
     updateTableLeft();
     sendToDisplay(true);
   });
+  $('#importLeftBtn').click(function() {
+   importMatrixLeft();
+  });
+   $('#imporRighttBtn').click(function() {
+   importMatrixRight();
+  });
+   $('#exportLeftBtn').click(function() {
+   exportMatrixLeft();
+  });
+   $('#exporRighttBtn').click(function() {
+   exportMatrixRight();
+  });
 	$('#wakeBtn').click(function() {
     wake(portLeft, true);
     wake(portRight, true);
@@ -264,6 +276,93 @@ function prepareValsForDrawingRight() {
   return vals;
 }
 
+function setMatrixLeftFromVals(vals) {
+  const width = matrix_left[0].length;
+  const height = matrix_left.length;
+
+  for (let col = 0; col < width; col++) {
+    for (let row = 0; row < height; row++) {
+      matrix_left[row][col] = vals.shift();
+    }
+  }
+
+function setMatrixRightFromVals(vals) {
+  const width = matrix_right[0].length;
+  const height = matrix_right.length;
+
+  for (let col = 0; col < width; col++) {
+    for (let row = 0; row < height; row++) {
+      matrix_right[row][col] = vals.shift();
+    }
+  }
+}
+
+function exportMatrixLeft() {
+  const vals = prepareValsForDrawingLeft();
+  //save json file
+  const blob = new Blob([JSON.stringify(vals)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "matrix_left.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportMatrixRight() {
+  const vals = prepareValsForDrawingRight();
+  //save json file
+  const blob = new Blob([JSON.stringify(vals)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "matrix_right.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importMatrixLeft() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.onchange = async function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const vals = JSON.parse(e.target.result);
+      setMatrixLeftFromVals(vals);
+      updateTableLeft();
+      sendToDisplay(true);
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function importMatrixRight() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.onchange = async function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const vals = JSON.parse(e.target.result);
+      setMatrixRightFromVals(vals);
+      updateTableRight();
+      sendToDisplay(true);
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
 
 async function sendToDisplay(recurse) {
     await sendToDisplayLeft(recurse);
