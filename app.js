@@ -148,13 +148,13 @@ function initOptions() {
   $('#importLeftBtn').click(function() {
    importMatrixLeft();
   });
-   $('#imporRighttBtn').click(function() {
+   $('#importRightBtn').click(function() {
    importMatrixRight();
   });
    $('#exportLeftBtn').click(function() {
    exportMatrixLeft();
   });
-   $('#exporRighttBtn').click(function() {
+   $('#exportRightBtn').click(function() {
    exportMatrixRight();
   });
 	$('#wakeBtn').click(function() {
@@ -258,6 +258,22 @@ function prepareValsForDrawingLeft() {
   return vals;
 }
 
+function getCellVals(vals) {
+  const cellVals = []
+  for (const val of vals) {
+    const bVal = val.toString(2).split('').reverse().join('');
+    const s = bVal.padEnd(8, "0")
+    for (const c of s) {
+      if (cellVals.length < 306) {
+        cellVals.push(parseInt(c))
+      } else {
+        break;
+      }
+    }
+  }
+  return cellVals;
+}
+
 function prepareValsForDrawingRight() {
 	const width = matrix_right[0].length;
 	const height = matrix_right.length;
@@ -279,20 +295,25 @@ function prepareValsForDrawingRight() {
 function setMatrixLeftFromVals(vals) {
   const width = matrix_left[0].length;
   const height = matrix_left.length;
+  const cellVals = getCellVals(vals);
 
-  for (let col = 0; col < width; col++) {
-    for (let row = 0; row < height; row++) {
-      matrix_left[row][col] = vals.shift();
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const val = cellVals.shift()
+      matrix_left[row][col] = (val + 1) % 2;
     }
   }
+}
 
 function setMatrixRightFromVals(vals) {
   const width = matrix_right[0].length;
   const height = matrix_right.length;
+  const cellVals = getCellVals(vals);
 
-  for (let col = 0; col < width; col++) {
-    for (let row = 0; row < height; row++) {
-      matrix_right[row][col] = vals.shift();
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const val = cellVals.shift()
+      matrix_right[row][col] = (val + 1) % 2;
     }
   }
 }
@@ -313,6 +334,8 @@ function exportMatrixLeft() {
 
 function exportMatrixRight() {
   const vals = prepareValsForDrawingRight();
+  console.log('Exported values')
+  console.log(vals)
   //save json file
   const blob = new Blob([JSON.stringify(vals)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -337,7 +360,8 @@ function importMatrixLeft() {
     reader.onload = function (e) {
       const vals = JSON.parse(e.target.result);
       setMatrixLeftFromVals(vals);
-      updateTableLeft();
+      // updateTableLeft();
+      updateMatrix(matrix_left, 'left')
       sendToDisplay(true);
     };
     reader.readAsText(file);
@@ -356,7 +380,8 @@ function importMatrixRight() {
     reader.onload = function (e) {
       const vals = JSON.parse(e.target.result);
       setMatrixRightFromVals(vals);
-      updateTableRight();
+      // updateTableRight();
+      updateMatrix(matrix_right, 'right')
       sendToDisplay(true);
     };
     reader.readAsText(file);
