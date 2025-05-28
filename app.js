@@ -346,9 +346,9 @@ function importMatrixLeft() {
     reader.onload = function (e) {
       const vals = JSON.parse(e.target.result);
       setMatrixLeftFromVals(vals);
-      // updateTableLeft();
       updateMatrix(matrix_left, 'left')
       sendToDisplay(true);
+      $("#select-left").val('Custom');
     };
     reader.readAsText(file);
   };
@@ -366,9 +366,9 @@ function importMatrixRight() {
     reader.onload = function (e) {
       const vals = JSON.parse(e.target.result);
       setMatrixRightFromVals(vals);
-      // updateTableRight();
       updateMatrix(matrix_right, 'right')
       sendToDisplay(true);
+       $("#select-right").val('Custom');
     };
     reader.readAsText(file);
   };
