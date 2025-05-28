@@ -258,22 +258,6 @@ function prepareValsForDrawingLeft() {
   return vals;
 }
 
-function getCellVals(vals) {
-  const cellVals = []
-  for (const val of vals) {
-    const bVal = val.toString(2).split('').reverse().join('');
-    const s = bVal.padEnd(8, "0")
-    for (const c of s) {
-      if (cellVals.length < 306) {
-        cellVals.push(parseInt(c))
-      } else {
-        break;
-      }
-    }
-  }
-  return cellVals;
-}
-
 function prepareValsForDrawingRight() {
 	const width = matrix_right[0].length;
 	const height = matrix_right.length;
@@ -295,12 +279,13 @@ function prepareValsForDrawingRight() {
 function setMatrixLeftFromVals(vals) {
   const width = matrix_left[0].length;
   const height = matrix_left.length;
-  const cellVals = getCellVals(vals);
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
-      const val = cellVals.shift()
-      matrix_left[row][col] = (val + 1) % 2;
+      const i = col + row * width;
+      const val = vals[Math.trunc(i/8)]
+      const bit = (val >> i % 8) & 1;
+      matrix_left[row][col] = (bit + 1) % 2;
     }
   }
 }
@@ -308,12 +293,13 @@ function setMatrixLeftFromVals(vals) {
 function setMatrixRightFromVals(vals) {
   const width = matrix_right[0].length;
   const height = matrix_right.length;
-  const cellVals = getCellVals(vals);
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
-      const val = cellVals.shift()
-      matrix_right[row][col] = (val + 1) % 2;
+      const i = col + row * width;
+      const val = vals[Math.trunc(i/8)]
+      const bit = (val >> i % 8) & 1;
+      matrix_right[row][col] = (bit + 1) % 2;
     }
   }
 }
