@@ -20,6 +20,7 @@ const VERSION_CMD = 0x20;
 
 const WIDTH = 9;
 const HEIGHT = 34;
+const WAKE_LOOP_INTERVAL_MSEC = 50_000
 
 const PATTERNS = [
   'Custom',
@@ -42,13 +43,16 @@ var msbendian = false;
 let portLeft = null;
 let portRight = null;
 let swap = false;
+let persist = false
 
 $(function() {
   matrix_left = createArray(34, 9);
   matrix_right = createArray(34, 9);
+
   updateTableLeft();
   updateTableRight();
   initOptions();
+  startWakeLoop()
 
   for (pattern of PATTERNS) {
     $("#select-left").append(`<option value="${pattern}">${pattern}</option>`);
@@ -66,6 +70,8 @@ $(function() {
     });
   }
 });
+
+// startWakeLoop()
 
 function drawPattern(matrix, pattern, pos) {
   for (let col = 0; col < WIDTH; col++) {
@@ -164,6 +170,9 @@ function initOptions() {
 	$('#sleepBtn').click(function() {
     wake(portLeft, false);
     wake(portRight, false);
+  });
+  $('#persistCb').click(function() {
+    persist = !persist;
   });
 	$('#bootloaderBtn').click(function() {
     bootloader(portLeft);
@@ -494,6 +503,16 @@ function createArray(length) {
     }
 
     return arr;
+}
+
+function startWakeLoop() {
+  setInterval(() => {
+    if (persist) {
+      console.log('WAKE')
+      wake(portLeft, true);
+      wake(portRight, true);
+    }
+  }, WAKE_LOOP_INTERVAL_MSEC)
 }
 
 async function wake(port, wake) {
