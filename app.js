@@ -54,7 +54,7 @@ $(function() {
   initOptions();
   startWakeLoop()
 
-  for (pattern of PATTERNS) {
+  for (const pattern of PATTERNS) {
     $("#select-left").append(`<option value="${pattern}">${pattern}</option>`);
     $("#select-left").on("change", async function() {
       if (pattern == 'Custom') return;
@@ -158,10 +158,20 @@ function initOptions() {
    importMatrixRight();
   });
    $('#exportLeftBtn').click(function() {
-   exportMatrixLeft();
+    //Export raw data (i.e. a 2D array instead of a 1d array of encoded bits)
+   exportMatrixLeft(true);
+  // No need to suport export of encoded file since import can handle either type
+  //  exportMatrixLeft(false)
   });
    $('#exportRightBtn').click(function() {
+<<<<<<< HEAD
    exportMatrixRight();
+=======
+   //Export raw data (i.e. a 2D array instead of a 1d array of encoded bits)
+   exportMatrixRight(true);
+  // No need to suport export of encoded file since import can handle either type
+  //  exportMatrixRight(false)
+>>>>>>> 5918936 (Support 2d or 1d arrray for import and export. Provide persist option to keep matrix awake)
   });
 	$('#wakeBtn').click(function() {
     wake(portLeft, true);
@@ -249,6 +259,7 @@ async function checkFirmwareVersion(port, side) {
   reader.releaseLock();
 }
 
+//Get matrix values encoded as a 39-byte array
 function prepareValsForDrawingLeft() {
 	const width = matrix_left[0].length;
 	const height = matrix_left.length;
@@ -267,6 +278,7 @@ function prepareValsForDrawingLeft() {
   return vals;
 }
 
+//Get matrix values encoded as a 39-byte array
 function prepareValsForDrawingRight() {
 	const width = matrix_right[0].length;
 	const height = matrix_right.length;
@@ -285,6 +297,45 @@ function prepareValsForDrawingRight() {
   return vals;
 }
 
+//Get matrix values set directly in a 39 x 9 item array
+function getRawValsMatrixRight() {
+	const width = matrix_right[0].length;
+	const height = matrix_right.length;
+
+  let vals = new Array(height)
+  for (const i in [...Array(height).keys()]) {
+    vals[i] = Array(width).fill(0)
+  }
+
+  for (let col = 0; col < width; col++) {
+    for (let row = 0; row < height; row++) {
+      const cell = matrix_right[row][col];
+      vals[row][col] = (cell == null ||  cell == 1) ? 0 : 1
+    }
+  }
+  return vals;
+}
+
+//Get matrix values set directly in a 39 x 9 item array
+function getRawValsMatrixLeft() {
+	const width = matrix_left[0].length;
+	const height = matrix_left.length;
+
+  let vals = new Array(height)
+  for (const i in [...Array(height).keys()]) {
+    vals[i] = Array(width).fill(0)
+  }
+
+  for (let col = 0; col < width; col++) {
+    for (let row = 0; row < height; row++) {
+      const cell = matrix_left[row][col];
+      vals[row][col] = (cell == null || cell == 1) ? 0 : 1
+    }
+  }
+  return vals;
+}
+
+//Set matrix values by decoding a 39-byte array
 function setMatrixLeftFromVals(vals) {
   const width = matrix_left[0].length;
   const height = matrix_left.length;
@@ -295,6 +346,7 @@ function setMatrixLeftFromVals(vals) {
       const val = vals[Math.trunc(i/8)]
       const bit = (val >> i % 8) & 1;
       matrix_left[row][col] = (bit + 1) % 2;
+<<<<<<< HEAD
     }
   }
 }
@@ -309,12 +361,60 @@ function setMatrixRightFromVals(vals) {
       const val = vals[Math.trunc(i/8)]
       const bit = (val >> i % 8) & 1;
       matrix_right[row][col] = (bit + 1) % 2;
+=======
+>>>>>>> 5918936 (Support 2d or 1d arrray for import and export. Provide persist option to keep matrix awake)
     }
   }
 }
 
-function exportMatrixLeft() {
-  const vals = prepareValsForDrawingLeft();
+//Set matrix values by decoding a 39-byte array
+function setMatrixRightFromVals(vals) {
+  const width = matrix_right[0].length;
+  const height = matrix_right.length;
+
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const i = col + row * width;
+      const val = vals[Math.trunc(i/8)]
+      const bit = (val >> i % 8) & 1;
+      matrix_right[row][col] = (bit + 1) % 2;
+    }
+  }
+}
+
+//Set matrix values from a 39 x 9 item array
+function setMatrixRightFromRawVals(vals) {
+  const width = matrix_right[0].length;
+  const height = matrix_right.length;
+
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      matrix_right[row][col] = !!!vals[row][col]
+    }
+  }
+}
+
+//Set matrix values from a 39 x 9 item array
+function setMatrixLeftFromRawVals(vals) {
+  const width = matrix_left[0].length;
+  const height = matrix_left.length;
+
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      matrix_left[row][col] = !!!vals[row][col]
+    }
+  }
+}
+
+function exportMatrixLeft(raw) {
+  let vals
+  if (raw) {
+    //set vals as a 39 by 9 byte array
+    vals = getRawValsMatrixLeft()
+  } else {
+    //encode vals into a 39-byte array
+    vals = prepareValsForDrawingLeft();
+  }
   //save json file
   const blob = new Blob([JSON.stringify(vals)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -327,8 +427,20 @@ function exportMatrixLeft() {
   URL.revokeObjectURL(url);
 }
 
+<<<<<<< HEAD
 function exportMatrixRight() {
   const vals = prepareValsForDrawingRight();
+=======
+function exportMatrixRight(raw) {
+  let vals
+  if (raw) {
+    //set vals as a 39 by 9 byte array
+    vals = getRawValsMatrixRight()
+  } else {
+    //encode vals into a 39-byte array
+    vals = prepareValsForDrawingRight();
+  }
+>>>>>>> 5918936 (Support 2d or 1d arrray for import and export. Provide persist option to keep matrix awake)
   console.log('Exported values')
   console.log(vals)
   //save json file
@@ -336,7 +448,7 @@ function exportMatrixRight() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "matrix_right.json";
+  a.download = `${raw ? 'matrix_right(raw).json' : 'matrix_right.json'}`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -354,7 +466,15 @@ function importMatrixLeft() {
     const reader = new FileReader();
     reader.onload = function (e) {
       const vals = JSON.parse(e.target.result);
+<<<<<<< HEAD
       setMatrixLeftFromVals(vals);
+=======
+      if (vals[0].length > 1) {
+        setMatrixLeftFromRawVals(vals)
+      } else {
+        setMatrixLeftFromVals(vals);
+      }
+>>>>>>> 5918936 (Support 2d or 1d arrray for import and export. Provide persist option to keep matrix awake)
       updateMatrix(matrix_left, 'left')
       sendToDisplay(true);
       $("#select-left").val('Custom');
@@ -374,7 +494,15 @@ function importMatrixRight() {
     const reader = new FileReader();
     reader.onload = function (e) {
       const vals = JSON.parse(e.target.result);
+<<<<<<< HEAD
       setMatrixRightFromVals(vals);
+=======
+      if (vals[0].length > 1) {
+        setMatrixRightFromRawVals(vals)
+      } else {
+        setMatrixRightFromVals(vals);
+      }
+>>>>>>> 5918936 (Support 2d or 1d arrray for import and export. Provide persist option to keep matrix awake)
       updateMatrix(matrix_right, 'right')
       sendToDisplay(true);
        $("#select-right").val('Custom');
@@ -508,7 +636,10 @@ function createArray(length) {
 function startWakeLoop() {
   setInterval(() => {
     if (persist) {
+<<<<<<< HEAD
       console.log('WAKE')
+=======
+>>>>>>> 5918936 (Support 2d or 1d arrray for import and export. Provide persist option to keep matrix awake)
       wake(portLeft, true);
       wake(portRight, true);
     }
