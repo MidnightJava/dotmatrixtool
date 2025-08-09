@@ -1,5 +1,14 @@
-# Framework Laptop 16 LED Matrix Input Module Control
+# Framework Laptop 16 LED Matrix Input Module Controlh
 
+## The upstream repo is apparently no longer monitored, so this fork will probably never be merged.
+
+The following enhancements are provided:
+
+- Import export capability
+  - Matrix values are saved as a 39 by 9 byte array
+- Persist button
+  - Continually wakes the matrix when selected, so the display does not turn off
+ 
 [View it in your browser.](https://ledmatrix.frame.work)
 
 This little web app can directly connect to the Framework Laptop 16 LED matrix
