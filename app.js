@@ -388,7 +388,7 @@ function setMatrixLeftFromRawVals(vals) {
 function exportMatrixLeft(raw) {
   let vals
   if (raw) {
-    //set vals as a 39 by 9 byte array
+    //set vals as a 34 by 9 byte array
     vals = getRawValsMatrixLeft()
   } else {
     //encode vals into a 39-byte array
@@ -409,7 +409,7 @@ function exportMatrixLeft(raw) {
 function exportMatrixRight(raw) {
   let vals
   if (raw) {
-    //set vals as a 39 by 9 byte array
+    //set vals as a 34 by 9 byte array
     vals = getRawValsMatrixRight()
   } else {
     //encode vals into a 39-byte array
